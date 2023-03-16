@@ -261,7 +261,7 @@ namespace JuanProject.Controllers
                 return View(loginVM);
             }
 
-            return RedirectToAction("index", "Home");
+            return RedirectToAction("chat", "chat");
         }
 
         public async Task<IActionResult> Logout()

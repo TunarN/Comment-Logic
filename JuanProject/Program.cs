@@ -1,4 +1,5 @@
 using JuanProject.DAL;
+using JuanProject.Hubs;
 using JuanProject.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddIdentity<AppUser, IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
+
+builder.Services.AddSignalR();
 
 builder.Services.Configure<IdentityOptions>(opt =>
 {
@@ -62,5 +65,7 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapHub<ChatHub>("/chat");
 
 app.Run();

@@ -1,0 +1,89 @@
+﻿@{
+    ViewData["Title"] = "Chat";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="row">
+
+        <div class="col-6">
+
+            <div class="row p-1">
+                <div class="col-1">User</div>
+                <div class="col-5"><input type="text" id="userInput" /></div>
+            </div>
+            <div class="row p-1">
+                <div class="col-1">Message</div>
+                <div class="col-5"><input type="text" class="w-100" id="messageInput" /></div>
+            </div>
+            <div class="row p-1">
+                <div class="col-6 text-end">
+                    <input type="button" id="sendButton" value="Send Message" />
+                </div>
+            </div>
+            <div class="row p-1">
+                <div class="col-6">
+                    <hr />
+                </div>
+            </div>
+            <div class="row p-1">
+                <div class="col-6">
+                    <ul id="messagesList"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6">
+            <ul class="list-group">
+                @foreach (AppUser item in ViewBag.Users)
+                {
+                    <li class="list-group-item">
+                        <a asp-controller="chat" asp-action="writeMessage" asp-route-userID="@item.Id">WriteMessage</a>
+                        <span id="@item.FullName" class="@(item.ConnectionId!=null?"bg-online":"bg-offline")" style="display:inline-block;width:15px;height:15px;border-radius:50%"></span> 
+                        @item.FullName</li>
+                }
+                
+            </ul>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.4/signalr.min.js" integrity="sha512-ulHhwQdGlX96gNSRsakG06STFdaQBUTbCX4KqLcYI428blEsttMkg2C3n2KtiYNDwnETBHXDg9ZAtvkfMHTYOQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
+        connection.start();
+
+        document.getElementById("sendButton").onclick = function () {
+            let userValue = document.getElementById("userInput").value;
+            let messageValue = document.getElementById("messageInput").value;
+            connection.invoke("SendMessage", userValue, messageValue);
+        };
+
+        connection.on("ReceiveMessage", function (user, message) {
+            var li = document.createElement("li");
+            document.getElementById("messagesList").appendChild(li);
+            li.textContent = `${user} says ${message}`;
+        })
+
+
+        connection.on("UserOnline", function (fullName) {
+            var li = document.createElement("li");
+            document.getElementById("messagesList").appendChild(li);
+            li.textContent = `${fullName} Online`;
+            document.getElementById(fullName).remove("bg-offline");
+            document.getElementById(fullName).add("bg-online");
+        })
+           connection.on("UserOffline", function (fullName) {
+            document.getElementById(fullName).remove("bg-online");
+            document.getElementById(fullName).add("bg-offline");
+        })
+
+         connection.on("WriteMessage", function (message) {
+           alert("salam");
+        })
+
+
+    </script>
+}
